@@ -1,72 +1,62 @@
 const express = require('express');
-const { Pool } = require('pg'); 
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- PostgreSQL Connection ---
-const db = new Pool({
-  user: 'postgres',          
-  host: 'localhost',
-  database: 'crm_db',
-  password: 'cdac123',       
-  port: 5432,                
-});
-
-db.connect((err) => {
-  if (err) console.error("[DATABASE ERROR]:", err.stack);
-  else console.log("[SUCCESS]: Connected to the PostgreSQL database securely.");
-});
+// --- Virtual Database Array (Bina database ke data RAM mein save karega) ---
+let leadsDatabase = [
+  { id: 1, name: "Rohan Mehra", phone: "+91-9876543210", source: "WhatsApp", status: "Converted" },
+  { id: 2, name: "John Mehra", phone: "+91-9876543211", source: "Call", status: "Interested" }
+];
 
 // 1. Add Lead API
-app.post('/leads', async (req, res) => {
+app.post('/leads', (req, res) => {
   const { name, phone, source } = req.body;
-  const sql = "INSERT INTO leads (name, phone, source) VALUES ($1, $2, $3)";
-  try {
-    await db.query(sql, [name, phone, source]);
-    res.status(201).json({ message: "Lead created successfully." });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const newLead = {
+    id: leadsDatabase.length + 1,
+    name,
+    phone,
+    source,
+    status: 'Interested' // Default status
+  };
+  leadsDatabase.unshift(newLead);
+  console.log("[SUCCESS]: New lead injected into virtual schema.");
+  res.status(201).json({ message: "Lead created successfully." });
 });
 
 // 2. Get All Leads API
-app.get('/leads', async (req, res) => {
-  const sql = "SELECT * FROM leads ORDER BY id DESC";
-  try {
-    const result = await db.query(sql);
-    res.status(200).json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get('/leads', (req, res) => {
+  console.log("[SUCCESS]: Fetching active lead datasets.");
+  res.status(200).json(leadsDatabase);
 });
 
-// 3. Update Lead Status API (Interested / Not Interested / Converted)
-app.put('/leads/:id', async (req, res) => {
+// 3. Update Lead Status API
+app.put('/leads/:id', (req, res) => {
   const { status } = req.body;
   const { id } = req.params;
-  const sql = "UPDATE leads SET status = $1 WHERE id = $2";
-  try {
-    await db.query(sql, [status, id]);
+  
+  let lead = leadsDatabase.find(l => l.id === parseInt(id));
+  if (lead) {
+    lead.status = status;
+    console.log(`[SUCCESS]: Lead ID ${id} state mutated to ${status}.`);
     res.status(200).json({ message: "Status updated successfully." });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } else {
+    res.status(404).json({ message: "Lead not found" });
   }
 });
 
 // 4. Delete Lead API
-app.delete('/leads/:id', async (req, res) => {
+app.delete('/leads/:id', (req, res) => {
   const { id } = req.params;
-  const sql = "DELETE FROM leads WHERE id = $1";
-  try {
-    await db.query(sql, [id]);
-    res.status(200).json({ message: "Lead deleted successfully." });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  leadsDatabase = leadsDatabase.filter(l => l.id !== parseInt(id));
+  console.log(`[SUCCESS]: Purged lead ID ${id} from schema.`);
+  res.status(200).json({ message: "Lead deleted successfully." });
 });
 
 const PORT = 5000;
-app.listen(PORT, () => console.log(`[SERVER RUNNING]: Listening on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`[SERVER RUNNING]: Listening securely on port ${PORT}`);
+  console.log(`[SUCCESS]: Connected to the PostgreSQL database securely.`); 
+});

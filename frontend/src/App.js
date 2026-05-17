@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaPhoneAlt, FaWhatsapp, FaUserPlus, FaUsers, FaCheckCircle, FaTrashAlt, FaGlobeAmericas, FaSlidersH, FaSearch } from 'react-icons/fa';
+import { FaPhoneAlt, FaWhatsapp, FaUserPlus, FaUsers, FaCheckCircle, FaTrashAlt, FaGlobeAmericas, FaSearch } from 'react-icons/fa';
 
 function App() {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(''); // Search Filter State
+  const [searchQuery, setSearchQuery] = useState('');
   const [form, setForm] = useState({ name: '', phone: '', source: 'Call' });
 
   const API_URL = 'http://localhost:5000/leads';
@@ -59,7 +59,6 @@ function App() {
     }
   };
 
-  // --- BONUS: Search Filter Logic ---
   const filteredLeads = leads.filter(lead => 
     lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     lead.phone.includes(searchQuery)
@@ -78,25 +77,24 @@ function App() {
     panel: { backgroundColor: 'rgba(255, 255, 255, 0.06)', padding: '24px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' },
     formGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' },
     input: { width: '100%', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', backgroundColor: 'rgba(15, 23, 42, 0.4)', color: '#fff', outline: 'none', boxSizing: 'border-box' },
-    select: { width: '100%', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', backgroundColor: 'rgba(15, 23, 42, 0.4)', color: '#fff', cursor: 'pointer', boxSizing: 'border-box' },
+    select: { width: '100%', padding: '10px 14px', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', backgroundColor: '#1e293b', color: '#fff', cursor: 'pointer', boxSizing: 'border-box', outline: 'none' },
     btnSubmit: { width: '100%', padding: '11px', backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', gridColumn: 'span 2' },
-    
-    // Search Bar Component Style
     searchBar: { display: 'flex', alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', padding: '10px 16px', marginBottom: '20px', width: '300px' },
-    
     tablePanel: { backgroundColor: 'rgba(255, 255, 255, 0.06)', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)', overflow: 'hidden' },
     table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
     th: { backgroundColor: 'rgba(255, 255, 255, 0.04)', color: '#94a3b8', padding: '14px 20px', fontSize: '0.85rem', fontWeight: '600', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' },
     td: { padding: '15px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', color: '#e2e8f0', fontSize: '0.95rem' },
     
-    // Color Badge State Configurator
     badge: (status) => {
       let bg = 'rgba(245, 158, 11, 0.15)', text = '#fbbf24', border = 'rgba(251, 191, 36, 0.3)';
       if (status === 'Converted') { bg = 'rgba(16, 185, 129, 0.15)'; text = '#34d399'; border = 'rgba(52, 211, 153, 0.3)'; }
       else if (status === 'Not Interested') { bg = 'rgba(239, 68, 68, 0.15)'; text = '#f87171'; border = 'rgba(248, 113, 113, 0.3)'; }
       return { padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600', display: 'inline-block', backgroundColor: bg, color: text, border: border };
     },
-    selectStatus: { backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '6px', padding: '4px 8px', fontSize: '0.85rem', cursor: 'pointer', outline: 'none' }
+    
+    // Dropdown fix with explicit dark theme colors
+    selectStatus: { backgroundColor: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.2)', color: '#ffffff', borderRadius: '6px', padding: '6px 10px', fontSize: '0.85rem', cursor: 'pointer', outline: 'none' },
+    optionItem: { backgroundColor: '#1e293b', color: '#ffffff' }
   };
 
   return (
@@ -109,7 +107,6 @@ function App() {
         </div>
 
         <div style={s.mainLayout}>
-          {/* BONUS: Simple Dashboard Analytics Counters */}
           <div style={s.statsPanel}>
             <div style={{ marginBottom: '15px', fontWeight: '600', color: '#cbd5e1' }}>Dashboard Metrics</div>
             <div style={s.statsGrid}>
@@ -131,9 +128,9 @@ function App() {
               <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleInputChange} required style={s.input} />
               <div style={{ gridColumn: 'span 2' }}>
                 <select name="source" value={form.source} onChange={handleInputChange} style={s.select}>
-                  <option value="Call">Call</option>
-                  <option value="WhatsApp">WhatsApp</option>
-                  <option value="Field">Field</option>
+                  <option value="Call" style={s.optionItem}>Call</option>
+                  <option value="WhatsApp" style={s.optionItem}>WhatsApp</option>
+                  <option value="Field" style={s.optionItem}>Field</option>
                 </select>
               </div>
               <button type="submit" style={s.btnSubmit}>Save Lead</button>
@@ -141,10 +138,9 @@ function App() {
           </div>
         </div>
 
-        {/* BONUS: Interactive Search Filter Component */}
         <div style={s.searchBar}>
           <FaSearch color="#64748b" style={{ marginRight: '10px' }} />
-          <input type="text" placeholder="Search by name or contact..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', width: '100%' }} />
+          <input type="text" placeholder="Search by name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ background: 'none', border: 'none', color: '#fff', outline: 'none', width: '100%' }} />
         </div>
 
         <div style={s.tablePanel}>
@@ -171,11 +167,10 @@ function App() {
                     <td style={s.td}>{lead.source}</td>
                     <td style={s.td}><span style={s.badge(lead.status || 'Interested')}>{lead.status || 'Interested'}</span></td>
                     <td style={{ ...s.td, textAlign: 'right', paddingRight: '25px' }}>
-                      {/* Dropdown to Update status easily across 3 required states */}
                       <select value={lead.status || 'Interested'} onChange={(e) => handleUpdateStatus(lead.id, e.target.value)} style={s.selectStatus}>
-                        <option value="Interested">Interested</option>
-                        <option value="Not Interested">Not Interested</option>
-                        <option value="Converted">Converted</option>
+                        <option value="Interested" style={s.optionItem}>Interested</option>
+                        <option value="Not Interested" style={s.optionItem}>Not Interested</option>
+                        <option value="Converted" style={s.optionItem}>Converted</option>
                       </select>
                       <button onClick={() => handleDeleteLead(lead.id)} style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', marginLeft: '15px' }}><FaTrashAlt /></button>
                     </td>
